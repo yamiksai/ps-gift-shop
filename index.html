@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Магазин PlayStation Gift Cards</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  button { margin: 5px; padding: 10px 20px; }
+  #faq { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h2>Выберите страну:</h2>
+<select id="countrySelect">
+  <option value="Турция">Турция</option>
+  <option value="Индия">Индия</option>
+</select>
+
+<h3>Доступные карты:</h3>
+<div id="cardsList"></div>
+
+<button id="buyBtn" disabled>Купить</button>
+
+<div id="faq">
+  <h3>FAQ</h3>
+  <p><b>Как оплатить?</b> После выбора карты, бот свяжется с вами для оплаты.</p>
+  <p><b>Сроки доставки?</b> Обычно в течение часа после оплаты.</p>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  const cardsData = {
+    'Турция': [
+      {name: 'PlayStation 50 TRY', price: '50 TRY'},
+      {name: 'PlayStation 100 TRY', price: '100 TRY'}
+    ],
+    'Индия': [
+      {name: 'PlayStation 1000 INR', price: '1000 INR'},
+      {name: 'PlayStation 2000 INR', price: '2000 INR'}
+    ]
+  };
+
+  const countrySelect = document.getElementById('countrySelect');
+  const cardsList = document.getElementById('cardsList');
+  const buyBtn = document.getElementById('buyBtn');
+  let selectedCard = null;
+
+  function renderCards() {
+    cardsList.innerHTML = '';
+    selectedCard = null;
+    buyBtn.disabled = true;
+    const country = countrySelect.value;
+    cardsData[country].forEach((card, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = `${card.name} - ${card.price}`;
+      btn.onclick = () => {
+        selectedCard = `${card.name} (${country})`;
+        buyBtn.disabled = false;
+        Array.from(cardsList.children).forEach(b => b.style.backgroundColor = '');
+        btn.style.backgroundColor = '#a0e0a0';
+      };
+      cardsList.appendChild(btn);
+    });
+  }
+
+  countrySelect.onchange = renderCards;
+  renderCards();
+
+  buyBtn.onclick = () => {
+    if (selectedCard) {
+      tg.sendData(selectedCard);
+      tg.close();
+    }
+  };
+</script>
+
+</body>
+</html>
